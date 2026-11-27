@@ -4,10 +4,11 @@ import {
   deleteOwnerProject,
   listOwnerProjects,
   openOwnerCv,
-  saveOwnerProfile,
   signInOwner,
+  updateOwnerCv,
   updateOwnerProject,
 } from './owner'
+import { projectTags, projectUrl, validHttpUrl } from './cvDisplay'
 
 const buttonClass = 'rounded-lg bg-indigo-700 px-4 py-2 font-semibold text-white hover:bg-indigo-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-700 disabled:opacity-60'
 const secondaryButtonClass = 'rounded-lg border border-slate-400 px-4 py-2 font-semibold hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-700 disabled:opacity-60'
@@ -39,17 +40,6 @@ function loadEditor() {
 
 function characterCount(value) {
   return Array.from(value).length
-}
-
-function validHttpUrl(value) {
-  const candidate = value.trim()
-  if (!/^https?:\/\/[^/\\\s][^\\\s]*$/i.test(candidate)) return false
-  try {
-    const url = new URL(candidate)
-    return ['http:', 'https:'].includes(url.protocol) && Boolean(url.hostname) && Boolean(url.host)
-  } catch {
-    return false
-  }
 }
 
 function validateFields(fields, definitions, requiredNames = []) {
@@ -100,7 +90,7 @@ function TextField({ field, value, error, onChange, disabled = false }) {
   )
 }
 
-function ProfileForm({ cv, onSaved }) {
+function ProfileForm({ cv, pending, onPendingChange, onSaved }) {
   const [values, setValues] = useState(() => Object.fromEntries(profileFields.map(({ name }) => [name, cv[name] ?? ''])))
   const [errors, setErrors] = useState({})
   const [validationMessage, setValidationMessage] = useState('')
@@ -120,8 +110,9 @@ function ProfileForm({ cv, onSaved }) {
     if (Object.keys(nextErrors).length) return
 
     setSaving(true)
+    onPendingChange(true)
     try {
-      const saved = await saveOwnerProfile(cv, fields)
+      const saved = await updateOwnerCv(cv, fields)
       setValues(Object.fromEntries(profileFields.map(({ name }) => [name, saved[name] ?? ''])))
       onSaved(saved)
       setMessage('Profile saved.')
@@ -129,6 +120,7 @@ function ProfileForm({ cv, onSaved }) {
       setMessage(`Profile was not saved. ${error.message}`)
     } finally {
       setSaving(false)
+      onPendingChange(false)
     }
   }
 
@@ -143,7 +135,7 @@ function ProfileForm({ cv, onSaved }) {
               field={field}
               value={values[field.name]}
               error={errors[field.name]}
-              disabled={saving}
+              disabled={saving || pending}
               onChange={(event) => {
                 setValues({ ...values, [field.name]: event.target.value })
                 if (errors[field.name]) setErrors({ ...errors, [field.name]: '' })
@@ -151,7 +143,7 @@ function ProfileForm({ cv, onSaved }) {
             />
           ))}
         </div>
-        <button type="submit" className={buttonClass} disabled={saving}>
+        <button type="submit" className={buttonClass} disabled={saving || pending}>
           {saving ? 'Saving profile…' : 'Save profile'}
         </button>
         {validationMessage && <p role="alert" className="text-red-800">{validationMessage}</p>}
@@ -219,12 +211,68 @@ function ProjectForm({ project, onSave, onSaved, onCancel, savingDisabled = fals
   )
 }
 
-function projectUrl(project) {
-  return project.project_url && validHttpUrl(project.project_url) ? project.project_url.trim() : ''
+function publicProfileUrl(cvId) {
+  const url = new URL(window.location.href)
+  url.search = ''
+  url.hash = ''
+  url.searchParams.set('cv', cvId)
+  return url.href
 }
 
-function projectTags(project) {
-  return project.tech_stack.split(',').map((tag) => tag.trim()).filter(Boolean)
+function PublicationPanel({ cv, pending, onPendingChange, onSaved }) {
+  const [outcome, setOutcome] = useState(null)
+  const [saving, setSaving] = useState(false)
+  const shareUrl = publicProfileUrl(cv.id)
+
+  async function togglePublished() {
+    if (!cv.published && !cv.full_name.trim()) {
+      setOutcome({ kind: 'error', message: 'Save a non-blank full name in your profile before publishing.' })
+      return
+    }
+
+    setOutcome(null)
+    setSaving(true)
+    onPendingChange(true)
+    try {
+      const saved = await updateOwnerCv(cv, { published: !cv.published })
+      onSaved(saved)
+      setOutcome({ kind: 'status', message: saved.published ? 'CV published.' : 'CV unpublished.' })
+    } catch (error) {
+      setOutcome({ kind: 'error', message: `CV status was not updated. ${error.message}` })
+    } finally {
+      setSaving(false)
+      onPendingChange(false)
+    }
+  }
+
+  async function copyLink() {
+    try {
+      await navigator.clipboard.writeText(shareUrl)
+      setOutcome({ kind: 'status', message: 'Public link copied.' })
+    } catch {
+      setOutcome({ kind: 'error', message: 'The link could not be copied. Select and copy the link above.' })
+    }
+  }
+
+  return (
+    <section aria-labelledby="publish-heading">
+      <h2 id="publish-heading" className="text-xl font-semibold">Publish &amp; Share</h2>
+      <p className="mt-2" role="status">{cv.published ? 'Published' : 'Private draft'}</p>
+      <button type="button" className={`${cv.published ? secondaryButtonClass : buttonClass} mt-3`} onClick={togglePublished} disabled={pending || saving}>
+        {saving ? 'Updating…' : cv.published ? 'Unpublish CV' : 'Publish CV'}
+      </button>
+      {cv.published && (
+        <div className="mt-4 space-y-3">
+          <label className="block text-sm font-medium">
+            Public CV link
+            <input className={inputClass} value={shareUrl} readOnly onFocus={(event) => event.target.select()} />
+          </label>
+          <button type="button" className={secondaryButtonClass} onClick={copyLink} disabled={pending || saving}>Copy link</button>
+        </div>
+      )}
+      {outcome && <p className="mt-3" role={outcome.kind === 'error' ? 'alert' : 'status'}>{outcome.message}</p>}
+    </section>
+  )
 }
 
 function ProjectCard({ project, onSave, onDelete, deleting, deleteDisabled }) {
@@ -254,7 +302,7 @@ function ProjectCard({ project, onSave, onDelete, deleting, deleteDisabled }) {
           {project.description && <p className="mt-3 whitespace-pre-wrap break-words text-sm">{project.description}</p>}
           {projectTags(project).length > 0 && (
             <ul className="mt-3 flex flex-wrap gap-2" aria-label="Technology stack">
-              {projectTags(project).map((tag, index) => <li key={`${tag}-${index}`} className="rounded-full bg-indigo-50 px-3 py-1 text-sm">{tag}</li>)}
+              {projectTags(project).map((tag, index) => <li key={`${tag}-${index}`} className="wrap-anywhere rounded-full bg-indigo-50 px-3 py-1 text-sm">{tag}</li>)}
             </ul>
           )}
           {url && <a className="mt-3 inline-block break-all text-indigo-800 underline" href={url} target="_blank" rel="noopener noreferrer">Project link</a>}
@@ -361,6 +409,7 @@ function ProjectsSection({ cv }) {
 
 export function CvEditor() {
   const [state, setState] = useState({ kind: 'loading' })
+  const [cvSaving, setCvSaving] = useState(false)
 
   useEffect(() => {
     let active = true
@@ -417,10 +466,20 @@ export function CvEditor() {
         <div className="space-y-8">
           <section aria-label="CV status">
             <h2 className="text-xl font-semibold">Your CV</h2>
-            <p className="mt-2" role="status">{state.cv.published ? 'Published' : 'Private draft'}</p>
             <p className="mt-2 break-all text-sm text-slate-600">CV ID: {state.cv.id}</p>
           </section>
-          <ProfileForm cv={state.cv} onSaved={(cv) => setState({ kind: 'ready', cv })} />
+          <PublicationPanel
+            cv={state.cv}
+            pending={cvSaving}
+            onPendingChange={setCvSaving}
+            onSaved={(cv) => setState({ kind: 'ready', cv })}
+          />
+          <ProfileForm
+            cv={state.cv}
+            pending={cvSaving}
+            onPendingChange={setCvSaving}
+            onSaved={(cv) => setState({ kind: 'ready', cv })}
+          />
           <ProjectsSection cv={state.cv} />
         </div>
       )}

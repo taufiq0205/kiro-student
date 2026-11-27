@@ -22,7 +22,7 @@ Draft for review after [requirements](requirements.md) and [design](design.md). 
     - Verify with two projects. Reload after creation and editing, cancel a delete once, then confirm it and reload again.
     - _Requirements: 3.1–3.5, 5.3, 6.2_
 
-- [ ] 3. Publish the public CV and verify the production build (22 min)
+- [x] 3. Publish the public CV and verify the production build (22 min)
   - **Publish and open the public CV (10 min, P0)**
     - Add status, publish/unpublish, the copyable link and the sessionless `/?cv=<uuid>` view. Render profile, project tags and safe links.
     - Verify a draft is unavailable in both a private window and the owner's browser. Check blank-name publish, then publish a valid CV and verify public rendering with no editor controls or sign-up request. Unpublish and reload to verify unavailability. Check malformed and missing IDs.
@@ -31,6 +31,7 @@ Draft for review after [requirements](requirements.md) and [design](design.md). 
     - Check mobile and desktop layouts, keyboard controls, labels and request feedback. Use Tailwind utilities and accessible icons if added.
     - Use two lab identities and a sessionless reader to confirm database grants and RLS via the Data API. Check that the reader can read only published data and cannot write to either table. Check that the second user cannot read a draft, change another owner's rows or add a project to the other owner's CV. Confirm denied writes left the fixture rows intact.
     - Run `npm run build`, confirm `dist/index.html` exists and verify the build used only the public Supabase configuration. Fix the smallest failing check and repeat it before uploading.
+    - **Verification (2026-11-27).** Live Chrome verified publish, copy, sessionless viewing, and unpublish with a fictional CV. The live Data API denied sessionless writes to both tables. Local Chrome checks covered mobile, desktop, and keyboard controls. The production bundle contained only public Supabase configuration. The workshop owner waived the two-account check. Cross-owner access remains unverified.
     - _Requirements: 5.1–5.4, 6.1–6.3_
 
 - [ ] 4. Deploy and verify on Netlify (10 min)

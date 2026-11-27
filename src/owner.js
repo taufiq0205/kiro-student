@@ -4,14 +4,26 @@ const url = import.meta.env.VITE_SUPABASE_URL
 const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
 
 let client
+let publicClient
 
-function getClient() {
+function createSupabaseClient(options) {
   if (!URL.canParse(url) || !url.startsWith('https://') || !key?.startsWith('sb_publishable_')) {
     throw new Error('Set the Supabase HTTPS URL and publishable key in .env.local, then restart the dev server.')
   }
 
-  client ??= createClient(url, key)
+  return createClient(url, key, options)
+}
+
+function getClient() {
+  client ??= createSupabaseClient()
   return client
+}
+
+function getPublicClient() {
+  publicClient ??= createSupabaseClient({
+    auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+  })
+  return publicClient
 }
 
 export async function signInOwner(credentials) {
@@ -57,7 +69,7 @@ export async function listOwnerProjects(cvId) {
   return data
 }
 
-export async function saveOwnerProfile(cv, fields) {
+export async function updateOwnerCv(cv, fields) {
   const { data, error } = await getClient()
     .from('cvs')
     .update(fields)
@@ -67,6 +79,20 @@ export async function saveOwnerProfile(cv, fields) {
     .maybeSingle()
   if (error) throw error
   if (!data) throw new Error('Your CV was not updated. Reload and try again.')
+  return data
+}
+
+const publicCvColumns = 'id, full_name, headline, summary, university, degree, location, skills, github_url, linkedin_url, projects(id, title, description, tech_stack, project_url, created_at)'
+
+export async function openPublicCv(id) {
+  const { data, error } = await getPublicClient()
+    .from('cvs')
+    .select(publicCvColumns)
+    .eq('id', id)
+    .eq('published', true)
+    .order('created_at', { ascending: false, referencedTable: 'projects' })
+    .maybeSingle()
+  if (error) throw error
   return data
 }
 
