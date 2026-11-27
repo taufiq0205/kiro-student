@@ -2,7 +2,7 @@
 
 Draft for review after [requirements](requirements.md) and [design](design.md). Run one task at a time in Kiro. Leave each checkbox open until its required verification passes. The estimates target 60 minutes of guided coding, assuming Node and Supabase are ready, with a separate 10-minute Netlify block as in the [workshop lab](../../../../01_Hands_On_Lab.md).
 
-- [ ] 1. Set up the app and private CV session (18 min)
+- [x] 1. Set up the app and private CV session (18 min)
   - **Scaffold React/Vite and Tailwind (8 min)**
     - Scaffold in `kiro-student/` and preserve the existing spec, `.env.local` and `.gitignore`. Add Tailwind v4 with `@tailwindcss/vite` and `@import "tailwindcss"`.
     - Verify `npm run dev` loads the app and renders a Tailwind utility style.
