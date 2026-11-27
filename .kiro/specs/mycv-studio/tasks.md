@@ -8,8 +8,8 @@ Draft for review after [requirements](requirements.md) and [design](design.md). 
     - Verify `npm run dev` loads the app and renders a Tailwind utility style.
     - _Requirements: 6.1, 6.3_
   - **Connect Supabase and restore the owner session (10 min)**
-    - Confirm anonymous sign-ins are enabled. Use the project URL and publishable key. Restore the owner session, wire **Start my CV** and load or create the private draft. Display the browser-bound session warning.
-    - Verify an initial visit makes no anonymous sign-up request, the click loads one private CV, and a hard refresh opens the same draft. Diagnose connection errors through public config, Auth settings and API responses before editing code.
+    - Create a confirmed workshop account. Use the project URL and publishable key. Wire email/password sign-in and restore the owner session to load or create the private draft.
+    - Verify an initial visit makes no sign-in request. Sign in and check that one private CV loads. Hard-refresh and sign in from a fresh browser to verify both open the same CV. Diagnose connection errors through public config, Auth settings and API responses before editing code.
     - _Requirements: 1.1–1.4, 5.4, 6.2_
 
 - [ ] 2. Save profiles and manage projects (20 min)
@@ -35,7 +35,7 @@ Draft for review after [requirements](requirements.md) and [design](design.md). 
 
 - [ ] 4. Deploy and verify on Netlify (10 min)
   - **Verify the manual deployment (10 min, P0, after build)**
-    - Upload `kiro-student/dist/` manually in Netlify. Open the HTTPS site and start a CV with fictional data on the hosted origin. Save a project and publish.
+    - Upload `kiro-student/dist/` manually in Netlify. Open the HTTPS site and sign in with the workshop account on the hosted origin and use fictional CV data. Save a project and publish.
     - Verify the editor restores the hosted CV after reload. Open and reload the copied link in a private window, then unpublish and verify it is unavailable. Record the hosted test result independently of the local build.
     - _Requirements: 1.3–1.4, 4.1–4.4, 6.3_
   - **Add browser Print/Save PDF (optional, after the lab)**

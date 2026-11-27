@@ -5,26 +5,26 @@ const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
 
 let client
 
-export async function openOwnerCv({ start }) {
+function getClient() {
   if (!URL.canParse(url) || !url.startsWith('https://') || !key?.startsWith('sb_publishable_')) {
     throw new Error('Set the Supabase HTTPS URL and publishable key in .env.local, then restart the dev server.')
   }
 
   client ??= createClient(url, key)
-  const restored = await client.auth.getSession()
-  if (restored.error) throw restored.error
+  return client
+}
 
-  let session = restored.data.session
-  if (!session && start) {
-    const signedIn = await client.auth.signInAnonymously()
-    if (signedIn.error?.code === 'anonymous_provider_disabled') {
-      throw new Error('Enable anonymous sign-ins in Supabase Authentication settings, then try again.')
-    }
-    if (signedIn.error) throw signedIn.error
-    session = signedIn.data.session
-    if (!session) throw new Error('Supabase did not return a session. Try again.')
-  }
-  if (!session) return null
+export async function signInOwner(credentials) {
+  const { data, error } = await getClient().auth.signInWithPassword(credentials)
+  if (error) throw error
+  if (!data.session) throw new Error('Supabase did not return a session. Try again.')
+}
+
+export async function openOwnerCv() {
+  const client = getClient()
+  const { data: { session }, error } = await client.auth.getSession()
+  if (error) throw error
+  if (!session || session.user.is_anonymous) return null
 
   const columns = 'id, published'
   const read = () =>

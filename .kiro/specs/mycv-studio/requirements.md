@@ -8,13 +8,13 @@ MyCV Studio is a student CV and portfolio builder for the 60-minute coding segme
 
 ### Acceptance criteria
 
-1.1 WHEN a student opens `/` without a saved session, THE SYSTEM SHALL show **Start my CV** and wait for a click before initiating anonymous sign-in.
+1.1 WHEN a student opens `/` without a saved session, THE SYSTEM SHALL show an email/password form and send credentials only when the student submits it.
 
-1.2 WHEN anonymous sign-in succeeds or the system restores a valid session, THE SYSTEM SHALL load that owner's CV or create a single blank, private draft if one is missing.
+1.2 WHEN email/password sign-in succeeds or the system restores a valid session, THE SYSTEM SHALL load that owner's CV or create a single blank, private draft if one is missing.
 
 1.3 WHEN a student returns on the same browser and site origin with a valid session, THE SYSTEM SHALL restore editing access to the same CV.
 
-1.4 WHILE offering anonymous editing, THE SYSTEM SHALL explain that editing access depends on browser storage and the site address, and that students should start their final CV on their deployed Netlify URL.
+1.4 WHEN a student signs in with the same account in a fresh browser or on the deployed site, THE SYSTEM SHALL open the same CV.
 
 ## Requirement 2 — Edit the CV profile
 
@@ -86,4 +86,4 @@ MyCV Studio is a student CV and portfolio builder for the 60-minute coding segme
 
 ## Workshop constraints
 
-Use JavaScript, React functional components, Vite, Tailwind CSS v4 with `@tailwindcss/vite`, and `@supabase/supabase-js` v2. Use the supplied [Supabase schema and RLS policies](../../../../supabase/01_schema_rls.sql). The classroom UI captures the listed CV fields. Manual Netlify deployment requires only the built files. Defer durable auth, sensitive personal fields such as MyKad or home address, uploads, custom server code, routing libraries and UI component libraries. Browser Print/Save PDF is optional after the core flow passes.
+Use JavaScript, React functional components, Vite, Tailwind CSS v4 with `@tailwindcss/vite`, and `@supabase/supabase-js` v2. Use the supplied [Supabase schema and RLS policies](../../../../supabase/01_schema_rls.sql). The classroom UI captures the listed CV fields. Manual Netlify deployment requires only the built files. Defer self-service account registration and recovery, sensitive personal fields such as MyKad or home address, uploads, custom server code, routing libraries and UI component libraries. Browser Print/Save PDF is optional after the core flow passes.

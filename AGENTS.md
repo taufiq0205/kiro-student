@@ -2,7 +2,7 @@
 
 ## Project overview
 
-MyCV Studio is a workshop app for creating a CV and publishing a shareable link. The frontend uses React, Vite, and Tailwind CSS v4. Supabase provides anonymous authentication and row-level security. Netlify hosts the static build.
+MyCV Studio is a workshop app for creating a CV and publishing a shareable link. The frontend uses React, Vite, and Tailwind CSS v4. Supabase provides email/password authentication and row-level security. Netlify hosts the static build.
 
 Read the [requirements](.kiro/specs/mycv-studio/requirements.md), [design](.kiro/specs/mycv-studio/design.md), and [task checklist](.kiro/specs/mycv-studio/tasks.md) before changing behavior. Mark a task complete after its required checks pass.
 
