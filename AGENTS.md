@@ -18,7 +18,7 @@ Run `npm ci` to install dependencies, `npm run dev` to start the app, and `npm r
 
 ## Local skills
 
-Open `.agents/skills/<name>/SKILL.md` before doing matching work. These skills are installed locally in the workshop workspace.
+Open `.agents/skills/<name>/SKILL.md` before doing matching work. These skills are checked into the workshop repository.
 
 | Work | Skills |
 | --- | --- |
