@@ -12,7 +12,7 @@ Draft for review after [requirements](requirements.md) and [design](design.md). 
     - Verify an initial visit makes no sign-in request. Sign in and check that one private CV loads. Hard-refresh and sign in from a fresh browser to verify both open the same CV. Diagnose connection errors through public config, Auth settings and API responses before editing code.
     - _Requirements: 1.1–1.4, 5.4, 6.2_
 
-- [ ] 2. Save profiles and manage projects (20 min)
+- [x] 2. Save profiles and manage projects (20 min)
   - **Save the profile (8 min)**
     - Add the **Profile** fields, schema-aligned limits, URL validation and request feedback.
     - Verify a changed name and skills persist after hard refresh and a malformed link is rejected before saving.
